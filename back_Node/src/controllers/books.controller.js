@@ -80,8 +80,8 @@ exports.create = async (req, res) => {
         };
 
         const newBook = await Books.create({
-            title: title,
-            author: author,
+            title: title.trim(),
+            author: author.trim(),
             available: available ?? true
         });
 
