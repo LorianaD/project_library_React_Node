@@ -1,5 +1,6 @@
 const db = require('../models');
-const Books = db.books;
+const Books = db.Books;
+const Type = db.Type;
 
 exports.booksList = async (req, res) =>{
     // console.log('test controller booksList');
@@ -8,7 +9,12 @@ exports.booksList = async (req, res) =>{
     // })
 
     try {
-        const books = await Books.findAll({include: { model: 'type', as: 'type' }});
+        const books = await Books.findAll({
+            order: [["title", "ASC"]], 
+            include: [{ model: Type, as: 'type', 
+            attributes: ['id', 'name'] }]
+        });
+
         res.status(200).json({
             success: true,
             message: 'liste des livres',
@@ -33,7 +39,15 @@ exports.show = async (req, res) =>{
     try {
 
         const id = Number(req.params.id);
-        const book = await Books.findByPk(id);
+
+        const typeId = {include: [{
+            model: Type,
+            as: 'type',
+            attributes: ['id', 'name']
+        }]};
+
+        const book = await Books.findByPk(id, typeId);
+        
         // console.log(book);
 
         if (!book) {
@@ -69,6 +83,12 @@ exports.create = async (req, res) => {
     try {
         // console.log('bd', req.body);
         
+        const typeId = {include: [{
+            model: Type,
+            as: 'type',
+            attributes: ['id', 'name']
+        }]};
+
         const {title, author, available} = req.body;
 
         if(!title || !author) {
@@ -82,7 +102,8 @@ exports.create = async (req, res) => {
         const newBook = await Books.create({
             title: title.trim(),
             author: author.trim(),
-            available: available ?? true
+            available: available === 'boolean' ? available : true,
+            typeId
         });
 
         res.status(200).json({
