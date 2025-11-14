@@ -4,21 +4,21 @@
 module.exports = {
   async up (queryInterface, Sequelize) {
 
-    await queryInterface.createTable('type', {
-      id: {
-        type: Sequelize.INTEGER,
-        autoIncrement : true,
-        primaryKey: true,
-      },
-      name: {
-        type: Sequelize.STRING(150),
-        allowNull:false
-      }
-    });
+    // await queryInterface.createTable('type', {
+    //   id: {
+    //     type: Sequelize.INTEGER,
+    //     autoIncrement : true,
+    //     primaryKey: true,
+    //   },
+    //   name: {
+    //     type: Sequelize.STRING(150),
+    //     allowNull:false
+    //   }
+    // });
 
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('type');
+    // await queryInterface.dropTable('type');
   }
 };
