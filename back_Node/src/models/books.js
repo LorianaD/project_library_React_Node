@@ -11,9 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      books.belongsTo(models.type, {
-        foreignKey: "type_id",
+      books.belongsTo(models.type, { // models.type = dans le dossier models tu cherche le model type
         as:"type",
+        foreignKey: "type_id",
       })
     }
   }
@@ -43,6 +43,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       validate: {
         notEmpty: true
+      }
+    },
+    type_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references:{
+        model:"type",
+        key: "id"
       }
     }
   }, {
