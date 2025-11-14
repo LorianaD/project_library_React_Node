@@ -8,7 +8,7 @@ exports.booksList = async (req, res) =>{
     // })
 
     try {
-        const books = await Books.findAll();
+        const books = await Books.findAll({include: { model: 'type', as: 'type' }});
         res.status(200).json({
             success: true,
             message: 'liste des livres',
