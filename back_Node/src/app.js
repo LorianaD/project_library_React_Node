@@ -10,6 +10,8 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
+app.use('/uploads', express.static('uploads'));
+
 app.use('/api', router);
 
 module.exports = app;

@@ -1,12 +1,14 @@
+const multer = require('multer');
 const db = require('../models');
 const Books = db.Books;
 const Type = db.Type;
+const {storage} = require('../middlewares/UploadFile');
+
+///////////////////////////////////////////////////////////////////////////////
+//////////////////////////// LISTE DES LIVRES /////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 exports.booksList = async (req, res) =>{
-    // console.log('test controller booksList');
-    // res.json({
-    //     message: 'test controller booksListe'
-    // })
 
     try {
         const books = await Books.findAll({
@@ -30,11 +32,11 @@ exports.booksList = async (req, res) =>{
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//////////////////////////// SHOW D'UN LIVRE //////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 exports.show = async (req, res) =>{
-    // console.log('test controller show');
-    // res.json({
-    //     message: 'test controller show'
-    // });
 
     try {
 
@@ -47,8 +49,6 @@ exports.show = async (req, res) =>{
         }]};
 
         const book = await Books.findByPk(id, typeId);
-        
-        // console.log(book);
 
         if (!book) {
             res.status(404).json({
@@ -75,21 +75,15 @@ exports.show = async (req, res) =>{
 
 }
 
-exports.create = async (req, res) => {
-    // console.log('test controller create');
-    // res.json({
-    //     message: 'test controller create'
-    // });
-    try {
-        // console.log('bd', req.body);
-        
-        const typeId = {include: [{
-            model: Type,
-            as: 'type',
-            attributes: ['id', 'name']
-        }]};
+///////////////////////////////////////////////////////////////////////////////
+//////////////////////////// CREER UN NOVEAU LIVRE ////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-        const {title, author, available} = req.body;
+exports.create = async (req, res) => {
+
+    try {
+
+        const {title, author, available, type_id} = req.body;
 
         if(!title || !author) {
             return res.status(400).json({
@@ -99,11 +93,32 @@ exports.create = async (req, res) => {
             })
         };
 
+        const type = await Type.findByPk(type_id);
+
+        if (!type) {
+            return res.status(400).json({
+                success: false,
+                message: "type inexistant",
+                data: null,
+            });        
+        }
+
+        // if (!req.file) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Aucun fichier reçu',
+        //         data:null
+        //     });
+        // }
+
+        const isAvalable = available === 'boolean' ? available : true;
+
         const newBook = await Books.create({
             title: title.trim(),
             author: author.trim(),
-            available: available === 'boolean' ? available : true,
-            typeId
+            available: isAvalable,
+            // image: req.file.filename,
+            type_id
         });
 
         res.status(200).json({
@@ -124,11 +139,11 @@ exports.create = async (req, res) => {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//////////////////////////// MODIFIER UN NOVEAU LIVRE /////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 exports.update = async (req, res) => {
-    // console.log('test controller update');
-    // res.json({
-    //     message: 'test controller update'
-    // });
     
     try {
         const id = Number(req.params.id);
@@ -162,6 +177,10 @@ exports.update = async (req, res) => {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//////////////////////////// SUPPRIMER UN NOVEAU LIVRE ////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 exports.delete = async (req, res) =>{
     try {
         const id = Number(req.params.id);
@@ -194,6 +213,72 @@ exports.delete = async (req, res) =>{
         })        
     }
 }
+
+/////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// AJOUTER UNE IMAGE ////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+
+exports.uploadCover = async (req, res) => {
+    try {
+
+        const id = Number(req.params.id);
+        if (!id) {
+            return res.status(400).json({
+                success : false,
+                message: "id incorect",
+                data: null
+            })
+        }
+
+        const book = await Books.findByPk(id);
+        
+        if (!book) {
+            return res.status(400).json({
+                success : false,
+                message: "livre introuvable",
+                data: null
+            })            
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "aucun fichier envoyé",
+                data: null
+            })
+        }
+
+        // generer l'url de l'image
+        const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        
+        // ajouter la logique pour envoyer l'information en dbb (le fichier )
+        // const cover = req.body;
+        book.cover = imageUrl;
+        await book.save();      
+
+        return res.status(200).json({
+            success: true,
+            message: "upload cover ok",
+            data: {
+                bookId: book.id,
+                filename: req.file.filename,
+                url: imageUrl
+            }
+        })
+
+    } catch (error) {
+        console.error('erreur sur delete', error);
+        res.status(500).json({
+            success: false,
+            message:"erreur sur la suppresion du produit",
+            data: null
+        }) 
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//////////////////////////// TEST DU CONTROLLER ///////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 exports.test = (req, res) =>{
     console.log('route test de mon controller books');
