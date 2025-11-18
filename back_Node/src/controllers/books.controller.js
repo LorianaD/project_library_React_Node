@@ -83,8 +83,10 @@ exports.create = async (req, res) => {
 
     try {
 
+        // on récupère les données saisie dans le body
         const {title, author, available, type_id} = req.body;
 
+        // on vérifie que le titre et l'auteur sont bien saisie
         if(!title || !author) {
             return res.status(400).json({
                 success: false,
@@ -93,15 +95,15 @@ exports.create = async (req, res) => {
             })
         };
 
-        const type = await Type.findByPk(type_id);
+        // const type = await Type.findByPk(type_id);
 
-        if (!type) {
-            return res.status(400).json({
-                success: false,
-                message: "type inexistant",
-                data: null,
-            });        
-        }
+        // if (!type) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: "type inexistant",
+        //         data: null,
+        //     });        
+        // }
 
         // if (!req.file) {
         //     return res.status(400).json({
@@ -118,7 +120,7 @@ exports.create = async (req, res) => {
             author: author.trim(),
             available: isAvalable,
             // image: req.file.filename,
-            type_id
+            // type_id
         });
 
         res.status(200).json({
