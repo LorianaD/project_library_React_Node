@@ -11,12 +11,16 @@ const {storage} = require('../middlewares/UploadFile');
 exports.booksList = async (req, res) =>{
 
     try {
+        // Récupération des livres
         const books = await Books.findAll({
-            order: [["title", "ASC"]], 
-            include: [{ model: Type, as: 'type', 
+            // filtrage : mise par ordre
+            order: [["title", "ASC"]],
+            // inclure les information de type
+            include: [{ model: Type, as: 'type',
             attributes: ['id', 'name'] }]
         });
 
+        // réponse
         res.status(200).json({
             success: true,
             message: 'liste des livres',
@@ -39,17 +43,20 @@ exports.booksList = async (req, res) =>{
 exports.show = async (req, res) =>{
 
     try {
-
+        // récupération de l'id dans le url (params)
         const id = Number(req.params.id);
 
+        // inclure les données du type
         const typeId = {include: [{
             model: Type,
             as: 'type',
             attributes: ['id', 'name']
         }]};
 
+        // récupération du livre dans la bd et type
         const book = await Books.findByPk(id, typeId);
 
+        // vérisication de l'existance du livre
         if (!book) {
             res.status(404).json({
                 success: false,
@@ -58,6 +65,7 @@ exports.show = async (req, res) =>{
             })
         }
 
+        // renvois de la réponse, donc le livre
         res.status(200).json({
             success: true,
             message: 'livre trouvé',
@@ -95,35 +103,35 @@ exports.create = async (req, res) => {
             })
         };
 
-        // const type = await Type.findByPk(type_id);
+        const type = await Type.findByPk(type_id);
 
-        // if (!type) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: "type inexistant",
-        //         data: null,
-        //     });        
-        // }
+        if (!type) {
+            return res.status(400).json({
+                success: false,
+                message: "type inexistant",
+                data: null,
+            });        
+        }
 
-        // if (!req.file) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: 'Aucun fichier reçu',
-        //         data:null
-        //     });
-        // }
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Aucun fichier reçu',
+                data:null
+            });
+        }
 
-        const isAvalable = available === 'boolean' ? available : true;
+        const isAvailable = available === "true";
 
         const newBook = await Books.create({
             title: title.trim(),
             author: author.trim(),
-            available: isAvalable,
-            // image: req.file.filename,
-            // type_id
+            available: isAvailable,
+            image: req.file.filename,
+            type_id
         });
 
-        res.status(200).json({
+        res.status(201).json({
             success: true,
             message: 'livre créé',
             data: newBook

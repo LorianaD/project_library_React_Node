@@ -6,7 +6,6 @@ const SALT_ROUNDS = 10;
 
 // s'enregistrer // Création du compte
 async function register({email, password}) {
-    
     // utilise bcrypt pour hasher le mp
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     // créeation de l'utilisateur ! stockage du mp en hashé
@@ -35,17 +34,16 @@ function generateToken(user) {
     );
 }
 
-function generateRefreshToken(user) {
-    return jwt.sign(
-        {sub: user.id},
-        process.env.REFRESH_TOKEN_SECRET,
-        {expiresIn: "7d"}
-    );
-}
+// function generateRefreshToken(user) {
+//     return jwt.sign(
+//         {sub: user.id},
+//         process.env.REFRESH_TOKEN_SECRET,
+//         {expiresIn: "7d"}
+//     );
+// }
 
-modules.exports = {
+module.exports = {
     register,
     validateCredentials,
     generateToken,
-    generateRefreshToken
 };
